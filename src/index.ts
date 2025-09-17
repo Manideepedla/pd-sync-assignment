@@ -33,11 +33,11 @@ interface PipedrivePersonSearchResponse {
 }
 
 
-// const getNestedValue = (obj: any, path: string): any => {
-//   return path.split('.').reduce((current, key) => {
-//     return current && current[key] !== undefined ? current[key] : undefined;
-//   }, obj);
-// };
+const getNestedValue = (obj: any, path: string): any => {
+  return path.split('.').reduce((current, key) => {
+    return current && current[key] !== undefined ? current[key] : undefined;
+  }, obj);
+};
 
 
 const formatContactInfo = (value: string, label: string = 'work', primary: boolean = true): PipedriveContactInfo[] => {
