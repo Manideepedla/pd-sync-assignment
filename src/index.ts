@@ -6,7 +6,7 @@ import axios, { AxiosResponse } from "axios";
 
 dotenv.config();
 
-
+// Loading environment variables
 const apiKey = process.env.PIPEDRIVE_API_KEY;
 const companyDomain = process.env.PIPEDRIVE_COMPANY_DOMAIN;
 
@@ -71,7 +71,7 @@ const buildPersonPayload = (inputData: any, mappings: FieldMapping[]): Partial<P
   return payload;
 };
 
-
+//Searching person function
 const searchPersonByName = async (name: string): Promise<PipedrivePerson | null> => {
   try {
     if (!name || !apiKey || !companyDomain) {
@@ -102,7 +102,7 @@ const searchPersonByName = async (name: string): Promise<PipedrivePerson | null>
   }
 };
 
-
+//Creating person function
 const createPerson = async (personData: Partial<PipedrivePerson>): Promise<PipedrivePerson> => {
   try {
     if (!apiKey || !companyDomain) {
@@ -128,7 +128,7 @@ const createPerson = async (personData: Partial<PipedrivePerson>): Promise<Piped
   }
 };
 
-
+//Function to update person
 const updatePerson = async (personId: number, personData: Partial<PipedrivePerson>): Promise<PipedrivePerson> => {
   try {
     if (!apiKey || !companyDomain) {
