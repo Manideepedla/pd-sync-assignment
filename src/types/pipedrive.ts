@@ -90,6 +90,5 @@ export interface PipedrivePerson {
   primary_email: string;
   cc_email: string;
   company_id: number;
-  // Allow additional string keys for custom fields (like the hash-named fields in the JSON)
   [key: string]: any;
 }
