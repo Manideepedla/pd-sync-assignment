@@ -4,20 +4,18 @@ import inputData from "./mappings/inputData.json";
 import mappings from "./mappings/mappings.json";
 import axios, { AxiosResponse } from "axios";
 
-// Load environment variables from .env file
 dotenv.config();
 
-// Get API key and company domain from environment variables
+
 const apiKey = process.env.PIPEDRIVE_API_KEY;
 const companyDomain = process.env.PIPEDRIVE_COMPANY_DOMAIN;
 
-// Interface for mapping configuration
 interface FieldMapping {
   pipedriveKey: string;
   inputKey: string;
 }
 
-// Interface for Pipedrive API responses
+
 interface PipedriveApiResponse<T> {
   success: boolean;
   data: T;
@@ -34,14 +32,14 @@ interface PipedrivePersonSearchResponse {
   };
 }
 
-// Utility function to get nested value from object using dot notation
-const getNestedValue = (obj: any, path: string): any => {
-  return path.split('.').reduce((current, key) => {
-    return current && current[key] !== undefined ? current[key] : undefined;
-  }, obj);
-};
 
-// Utility function to format contact info for Pipedrive
+// const getNestedValue = (obj: any, path: string): any => {
+//   return path.split('.').reduce((current, key) => {
+//     return current && current[key] !== undefined ? current[key] : undefined;
+//   }, obj);
+// };
+
+
 const formatContactInfo = (value: string, label: string = 'work', primary: boolean = true): PipedriveContactInfo[] => {
   if (!value) return [];
   return [{
@@ -51,7 +49,7 @@ const formatContactInfo = (value: string, label: string = 'work', primary: boole
   }];
 };
 
-// Function to build Pipedrive person payload from input data using mappings
+
 const buildPersonPayload = (inputData: any, mappings: FieldMapping[]): Partial<PipedrivePerson> => {
   const payload: any = {};
   
@@ -59,7 +57,7 @@ const buildPersonPayload = (inputData: any, mappings: FieldMapping[]): Partial<P
     const inputValue = getNestedValue(inputData, mapping.inputKey);
     
     if (inputValue !== undefined && inputValue !== null) {
-      // Handle special cases for contact info fields
+
       if (mapping.pipedriveKey === 'email' && typeof inputValue === 'string') {
         payload[mapping.pipedriveKey] = formatContactInfo(inputValue, 'work', true);
       } else if (mapping.pipedriveKey === 'phone' && typeof inputValue === 'string') {
@@ -73,7 +71,7 @@ const buildPersonPayload = (inputData: any, mappings: FieldMapping[]): Partial<P
   return payload;
 };
 
-// Function to search for existing person by name
+
 const searchPersonByName = async (name: string): Promise<PipedrivePerson | null> => {
   try {
     if (!name || !apiKey || !companyDomain) {
@@ -104,7 +102,7 @@ const searchPersonByName = async (name: string): Promise<PipedrivePerson | null>
   }
 };
 
-// Function to create a new person in Pipedrive
+
 const createPerson = async (personData: Partial<PipedrivePerson>): Promise<PipedrivePerson> => {
   try {
     if (!apiKey || !companyDomain) {
@@ -130,7 +128,7 @@ const createPerson = async (personData: Partial<PipedrivePerson>): Promise<Piped
   }
 };
 
-// Function to update an existing person in Pipedrive
+
 const updatePerson = async (personId: number, personData: Partial<PipedrivePerson>): Promise<PipedrivePerson> => {
   try {
     if (!apiKey || !companyDomain) {
@@ -156,15 +154,15 @@ const updatePerson = async (personId: number, personData: Partial<PipedrivePerso
   }
 };
 
-// Main synchronization function
+
 const syncPdPerson = async (): Promise<PipedrivePerson> => {
   try {
-    // Edge Case 1: Validate environment variables
+
     if (!apiKey || !companyDomain) {
       throw new Error('Missing required environment variables: PIPEDRIVE_API_KEY or PIPEDRIVE_COMPANY_DOMAIN');
     }
 
-    // Edge Case 2: Validate input data and mappings
+
     if (!inputData || Object.keys(inputData).length === 0) {
       throw new Error('Input data is empty or invalid');
     }
@@ -177,13 +175,13 @@ const syncPdPerson = async (): Promise<PipedrivePerson> => {
     console.log('Input data:', JSON.stringify(inputData, null, 2));
     console.log('Mappings:', JSON.stringify(mappings, null, 2));
 
-    // Find the name mapping to determine what field to use for searching
+
     const nameMapping = mappings.find((mapping: FieldMapping) => mapping.pipedriveKey === 'name');
     if (!nameMapping) {
       throw new Error('No mapping found for "name" field - required for person identification');
     }
 
-    // Get the name value from input data
+
     const nameValue = getNestedValue(inputData, nameMapping.inputKey);
     if (!nameValue || typeof nameValue !== 'string') {
       throw new Error(`Invalid or missing name value for field: ${nameMapping.inputKey}`);
@@ -191,21 +189,21 @@ const syncPdPerson = async (): Promise<PipedrivePerson> => {
 
     console.log(`Searching for person with name: "${nameValue}"`);
 
-    // Build the person payload from input data using mappings
+
     const personPayload = buildPersonPayload(inputData, mappings);
     console.log('Built person payload:', JSON.stringify(personPayload, null, 2));
 
-    // Search for existing person
+
     const existingPerson = await searchPersonByName(nameValue);
 
     let resultPerson: PipedrivePerson;
 
     if (existingPerson) {
-      // Update existing person
+
       console.log('Updating existing person...');
       resultPerson = await updatePerson(existingPerson.id, personPayload);
     } else {
-      // Create new person
+
       console.log('Creating new person...');
       resultPerson = await createPerson(personPayload);
     }
@@ -214,7 +212,7 @@ const syncPdPerson = async (): Promise<PipedrivePerson> => {
     return resultPerson;
 
   } catch (error: any) {
-    // Edge Case 3: Comprehensive error handling with specific error types
+
     console.error('Error in syncPdPerson:', error.message);
     
     if (error.response?.status === 401) {
@@ -229,15 +227,15 @@ const syncPdPerson = async (): Promise<PipedrivePerson> => {
       throw new Error('Network error - please check your internet connection');
     }
     
-    // Re-throw the error to be handled by the caller
+
     throw error;
   }
 };
 
-// Export the function as required by the assignment
+
 export { syncPdPerson };
 
-// Execute the synchronization when run directly
+
 const executSync = async () => {
   try {
     const pipedrivePerson = await syncPdPerson();
@@ -250,5 +248,5 @@ const executSync = async () => {
   }
 };
 
-// Run the synchronization - this matches the original assignment structure
+
 executSync();
